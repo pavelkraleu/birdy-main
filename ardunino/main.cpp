@@ -2,20 +2,23 @@
 #include <SPI.h>
 #include <MFRC522.h>
 #include <rn2xx3.h>
-#include <dht.h>
 
 int RST_PIN = 9;
 int SS_PIN = 10;
 int PIR_SENSOR_PIN = 7;
 int BUZZER_PIN = 6;
-int DHT_PIN = 4;
 
+// To prevent duplicates, recognise bird only once per 10 seconds
 unsigned long MIN_BIRD_DELAY_SECONDS = (1000 * 10);
+
+// Send bird readings every hour
 unsigned long SEND_DATA_LORA_DELAY_SECONDS = (1000 * 60 * 60);
 
 int birds_detected = 0;
 int air_temperature = 0;
 int air_humidity = 0;
+
+char uid_card[17];
 
 const char *appEui = "XXXXX";
 const char *appKey = "XXXXX";
@@ -24,8 +27,6 @@ unsigned long last_bird_detected = 0;
 unsigned long last_lora_send = SEND_DATA_LORA_DELAY_SECONDS;
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);
-
-dht DHT;
 
 rn2xx3 myLora(Serial2);
 
@@ -67,7 +68,7 @@ void setup() {
 
 }
 
-void setup_lora(){
+void setup_lora() {
 
   SerialUSB.println("Rebooting LoRa chip");
 
@@ -81,7 +82,7 @@ void setup_lora(){
   myLora.autobaud();
 
   String hweui = myLora.hweui();
-  while(hweui.length() != 16)
+  while (hweui.length() != 16)
   {
     SerialUSB.println("Communication with RN2xx3 unsuccessful. Power cycle the board.");
 
@@ -101,7 +102,7 @@ void setup_lora(){
 
   join_result = myLora.initOTAA(appEui, appKey);
 
-  while(!join_result)
+  while (!join_result)
   {
     SerialUSB.println("Unable to join. Are your keys correct, and do you have TTN coverage?");
     delay(60000);
@@ -112,53 +113,45 @@ void setup_lora(){
 
 }
 
-void beep(int freq, int numbeep){
+void beep(int freq, int numbeep) {
 
-    for(int i=0; i < numbeep; i++){
-      tone(BUZZER_PIN, freq);
-      delay(100);
-
-      noTone(BUZZER_PIN);
-      delay(100);
-    }
+  for (int i = 0; i < numbeep; i++) {
+    tone(BUZZER_PIN, freq);
+    delay(100);
 
     noTone(BUZZER_PIN);
+    delay(100);
+  }
+
+  noTone(BUZZER_PIN);
 
 }
 
 
-bool detect_bird(){
+bool detect_bird() {
 
   if (digitalRead(PIR_SENSOR_PIN) == HIGH && millis() >= last_bird_detected + MIN_BIRD_DELAY_SECONDS) {
 
-      SerialUSB.println("Bird detected !");
+    SerialUSB.println("Bird detected !");
 
-      beep(5000, 3);
+    beep(5000, 3);
 
-      last_bird_detected = millis();
+    last_bird_detected = millis();
 
-      SerialUSB.print("Bird detected at : ");
-      SerialUSB.print(last_bird_detected);
-      SerialUSB.println();
+    SerialUSB.print("Bird detected at : ");
+    SerialUSB.print(last_bird_detected);
+    SerialUSB.println();
 
-      birds_detected++;
+    birds_detected++;
 
-      return true;
+    return true;
   }
 
   return false;
 
 }
 
-void detect_temperature(){
-  int chk = DHT.read11(DHT_PIN);
-  SerialUSB.print("Temperature = ");
-  SerialUSB.println(DHT.temperature);
-  SerialUSB.print("Humidity = ");
-  SerialUSB.println(DHT.humidity);
-}
-
-void detect_card(){
+void detect_card() {
 
   if (!mfrc522.PICC_IsNewCardPresent())
     return;
@@ -166,35 +159,30 @@ void detect_card(){
   if (!mfrc522.PICC_ReadCardSerial())
     return;
 
-  // SerialUSB.print("PICC type: ");
-  // MFRC522::PICC_Type piccType = mfrc522.PICC_GetType(mfrc522.uid.sak);
-  // SerialUSB.println(mfrc522.PICC_GetTypeName(piccType));
+  for (byte i = 0; i < mfrc522.uid.size; i++) {
+    sprintf(&uid_card[2 * i], "%02X", mfrc522.uid.uidByte[i]);
+  }
 
-  SerialUSB.println("The NUID tag is:");
-  SerialUSB.print("In hex: ");
-  printHex(mfrc522.uid.uidByte, mfrc522.uid.size);
-  SerialUSB.println();
-  SerialUSB.print("In dec: ");
-  printDec(mfrc522.uid.uidByte, mfrc522.uid.size);
-  SerialUSB.println();
+  SerialUSB.println("Card UID :");
+  SerialUSB.println(uid_card);
+
+  char buf[256];
+  snprintf(buf, sizeof buf, "{\"c\":\"%s\"}", uid_card);
+
+  SerialUSB.println("Sending message");
+  SerialUSB.println(buf);
+
+  myLora.tx(buf);
 
   beep(1000, 3);
 }
 
-void send_lora(){
-  if (millis() >= last_lora_send + SEND_DATA_LORA_DELAY_SECONDS){
+void send_lora() {
+  if (millis() >= last_lora_send + SEND_DATA_LORA_DELAY_SECONDS) {
     SerialUSB.println("Sending message to LoRa");
 
     SerialUSB.print("Number of birds detected : ");
     SerialUSB.print(birds_detected);
-    SerialUSB.println();
-
-    SerialUSB.print("Air temperature : ");
-    SerialUSB.print(air_temperature);
-    SerialUSB.println();
-
-    SerialUSB.print("Air humidity : ");
-    SerialUSB.print(air_humidity);
     SerialUSB.println();
 
     char buf[256];
@@ -217,8 +205,6 @@ void loop() {
   detect_bird();
 
   detect_card();
-
-  detect_temperature();
 
   send_lora();
 

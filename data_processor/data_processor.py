@@ -28,7 +28,8 @@ class DataProcessor(object):
         condition = location.condition()
 
         condition_text = condition.text()
-        temperature = (int(condition.temp()) - 32) / 1.8
+        # temperature = (int(condition.temp()) - 32) / 1.8
+        temperature = int(condition.temp())
 
         self.birds_sheet.append_row([datetime.datetime.now(), number_of_birds, condition_text, temperature])
 
