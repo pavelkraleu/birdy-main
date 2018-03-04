@@ -10,17 +10,17 @@ class DataProcessor(object):
     google_sheet_file = "./client_secret.json"
 
     scope = ['https://spreadsheets.google.com/feeds']
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(google_sheet_file, scope)
-
-    gc = gspread.authorize(credentials)
-
-    birds_sheet = gc.open(google_sheet_id).worksheet("Sheet1")
-    cards_sheet = gc.open(google_sheet_id).worksheet("Sheet2")
 
     weather = Weather()
 
     def __init__(self):
-        pass
+
+        credentials = ServiceAccountCredentials.from_json_keyfile_name(self.google_sheet_file, self.scope)
+
+        gc = gspread.authorize(credentials)
+
+        self.birds_sheet = gc.open(self.google_sheet_id).worksheet("Sheet1")
+        self.cards_sheet = gc.open(self.google_sheet_id).worksheet("Sheet2")
 
     def submit_data(self, number_of_birds):
 
