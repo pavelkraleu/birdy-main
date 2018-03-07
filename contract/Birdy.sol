@@ -176,7 +176,7 @@ contract Birdy is Ownable{
         if (balance >= payout) {
             breeder.transfer(payout);
         } else {
-            breeder.tranfer(balance);
+            breeder.transfer(balance);
         }
         
         paidOut(breeder, payout);
