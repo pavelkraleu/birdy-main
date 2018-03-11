@@ -20,4 +20,8 @@ python3 -m data_processor
 
 TBC
 
+## How it looks like
+
 <img src="pic.jpg">
+
+<img src="top_view.png">
