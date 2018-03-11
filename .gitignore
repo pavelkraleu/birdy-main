@@ -1,3 +1,5 @@
 .idea/
 client_secret.json
 lora_keys.txt
+ethereum_key_file.json
+secret_keys.py
