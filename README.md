@@ -1,6 +1,6 @@
 # Blockchain connected bird feeder
 
-**Authors :** [Pavel Kral](mailto:pavel@pavelkral.eu), Josef Jelacic, Ondrej Barta<br>
+**Authors :** [Pavel Kral](mailto:pavel@pavelkral.eu), Josef Jelacic, [Ondrej Barta](http://ondrejbarta.xyz/)<br>
 **Licence :** [WTFPL](http://www.wtfpl.net/)<br>
 **Website :** [https://pavelkraleu.github.io/birdy-website/](https://pavelkraleu.github.io/birdy-website/)<br>
 
