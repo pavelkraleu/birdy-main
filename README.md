@@ -1,8 +1,8 @@
 # Blockchain connected bird feeder
 
-**Authors :** Pavel Kral [pavel@pavelkral.eu](mailto:pavel@pavelkral.eu), Josef Jelacic
-**Licence :** [DO WHAT THE FUCK YOU WANT TO](http://www.wtfpl.net/)
-**Website :** [https://pavelkraleu.github.io/birdy-website/](https://pavelkraleu.github.io/birdy-website/)
+**Authors :** Pavel Kral [pavel@pavelkral.eu](mailto:pavel@pavelkral.eu), Josef Jelacic<br>
+**Licence :** [DO WHAT THE FUCK YOU WANT TO](http://www.wtfpl.net/)<br>
+**Website :** [https://pavelkraleu.github.io/birdy-website/](https://pavelkraleu.github.io/birdy-website/)<br>
 
 
 Birdy is bird feeder located in [Paper Hub](http://paperhub.cz/) which will pay you Ethereum for birds attracted by your feed.
